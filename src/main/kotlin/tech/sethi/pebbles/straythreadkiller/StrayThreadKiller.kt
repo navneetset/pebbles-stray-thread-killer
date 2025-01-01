@@ -18,6 +18,13 @@ object StrayThreadKiller : ModInitializer {
             this.server = server
             isServerRunning = true
 
+            ConfigHandler
+
+            if (!ConfigHandler.config.enabled) {
+                logger.info("Stray Thread Killer is disabled. Skipping initialization.")
+                return@register
+            }
+
             watchThread.execute {
                 try {
                     while (isServerRunning) {
@@ -25,7 +32,7 @@ object StrayThreadKiller : ModInitializer {
 
                         if (server == null || !server.isRunning) {
                             logger.info("Server is no longer running, stopping thread monitoring.")
-                            Thread.sleep(5000)
+                            Thread.sleep(ConfigHandler.config.waitToShutdownSeconds * 1000L)
                             isServerRunning = false
                             forceShutdownStrayThreads()
                         }
